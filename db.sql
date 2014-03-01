@@ -1,5 +1,5 @@
 # Create user database
-# Add first user as admin, and password 'abc123'
+# Add first user as admin, password 'abc123', and access level 10
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
