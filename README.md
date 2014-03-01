@@ -22,8 +22,8 @@ here. MySQL versions down to 4.1 are also supported.
 
 ## Requirements
 
-PHP version >5.0
-MySQL version >4.1
+ * PHP version >5.0
+ * MySQL version >4.1
 
 ## Future
 
