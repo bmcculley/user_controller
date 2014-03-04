@@ -3,7 +3,7 @@
  * A Class to control user access to pages on a site.
  * Unlimited access levels.
  * 
- * Source Code URL: 
+ * Source Code URL: https://github.com/bmcculley/user_controller
  * Developer URL: http://bmcculley.github.io
  *
  */
