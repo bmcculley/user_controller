@@ -37,6 +37,7 @@ bit of sense.
 ### List of things to complete
 
  * Complete functions
+ * Functions should also return error codes so we know what's going on
  * Update hierarchy so the order of everything makes sense
  * Add in my [session controller](https://github.com/bmcculley/session-controller) class to better handle logged in users
  * Add in a better mailer function that will handle both plain text and HTML
