@@ -72,10 +72,10 @@ class Login {
 			$verify_string = urlencode($verify_string);
 
 			// check that the email or username doesn't already exist in database
-			if( check_user($email, $username) ) {
+			if( $this->check_user($email, $username) ) {
 				// user already exists
 			}
-			elseif ( password_strength($password) ) {
+			elseif ( $this->password_strength($password) ) {
 				// password is too short/weak
 			}
 			else {
@@ -94,7 +94,7 @@ class Login {
 				}
 				else {
 					// set a page to redirect user to
-					send_email($email, $verify_string);
+					$this->send_email($email, $verify_string);
 					header('Location: ./');
 					return True;
 				}
@@ -146,7 +146,7 @@ class Login {
 			    return False;
 			}
 			else {
-				$newPass = new_password();
+				$newPass = $this->new_password();
 				
 				$sql = "UPDATE ".$this->table_name." SET password='".$newPass."' WHERE email='".$email."' LIMIT 1";
 
@@ -160,7 +160,7 @@ class Login {
 					    
 					} 
 					// set a page to redirect user to
-					send_email($email, NULL, $username, $newPass);
+					$this->send_email($email, NULL, $username, $newPass);
 					header('Location: ./');
 					return True;
 				}
@@ -176,7 +176,7 @@ class Login {
 			    return False;
 			}
 			else {
-				$newPass = new_password();
+				$newPass = $this->new_password();
 				
 				$sql = "UPDATE ".$this->table_name." SET password='".$newPass."' WHERE username='".$username."' LIMIT 1";
 
@@ -190,7 +190,7 @@ class Login {
 					    
 					} 
 					// set a page to redirect user to
-					send_email($email, NULL, $username, $newPass);
+					$this->send_email($email, NULL, $username, $newPass);
 					header('Location: ./');
 					return True;
 				}
