@@ -14,6 +14,7 @@ class Login {
 	private $salt = '40be4e59b9a2a2b5dffb918c0e86b3d7';
 	private $table_name = 'users';
 	private $default_access_level = 1;
+	private $password_length = 8;
 	private $site_name;
 	private $site_email;
 	private $verify_page;
@@ -64,8 +65,6 @@ class Login {
 			// email is valid, continue with registeration
 			$email = mysqli_real_escape_string($this->con, $email);
 			$username = mysqli_real_escape_string($this->con, $username);
-			$password = md5($password.$this->salt);
-			$password = mysqli_real_escape_string($this->con, $password);
 
 			// create a verification hash to be stored and sent as part of the verify link
 			$verify_string = md5( rand(0,1000) );
@@ -76,7 +75,12 @@ class Login {
 			if( check_user($email, $username) ) {
 				// user already exists
 			}
+			elseif ( password_strength($password) ) {
+				// password is too short/weak
+			}
 			else {
+				$password = md5($password.$this->salt);
+				$password = mysqli_real_escape_string($this->con, $password);
 				$sql = "INSERT INTO ".$this->table_name." (id, username, password, email, verify_string, access_level, active) 
 							VALUES (NULL, 
 								'".$email."',
@@ -103,6 +107,33 @@ class Login {
 			// email address is no good, do not register
 			return False;
 		}
+
+	}
+
+	private function password_strength($password) {
+		$returnVal = True;
+
+		if ( strlen($password) < $password_length ) {
+			$returnVal = False;
+		}
+
+		if ( !preg_match("#[0-9]+#", $password) ) {
+			$returnVal = False;
+		}
+
+		if ( !preg_match("#[a-z]+#", $password) ) {
+			$returnVal = False;
+		}
+
+		if ( !preg_match("#[A-Z]+#", $password) ) {
+			$returnVal = False;
+		}
+
+		if ( !preg_match("/[\'^£$%&*()}{@#~?><>,|=_+!-]/", $password) ) {
+			$returnVal = False;
+		}
+
+		return $returnVal;
 
 	}
 
