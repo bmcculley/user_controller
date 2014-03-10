@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `mail` (`email`)
 );
 
-INSERT INTO `users` VALUES (NULL, 'admin', '24f9dc05c05e04ef6097fb842a635141', 'email@example.com', 10, 'y');
+INSERT INTO `users` VALUES (NULL, 'admin', '24f9dc05c05e04ef6097fb842a635141', 'email@example.com', '', 10, 'y');
