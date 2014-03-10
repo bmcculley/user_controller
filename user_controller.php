@@ -238,17 +238,21 @@ class Login {
 			if ( !$this->password_strength($newPass) ) {
 				return False;
 			}
+			elseif ( $newPass != $newPassVerify ) {
+				return False;
+			}
 			else {
 				$newPass = md5($newPass.$this->salt);
 				$newPass = mysqli_real_escape_string($this->con, $newPass);
 
-				$sql = "UPDATE ".$this->table_name." SET password='".$newPass."' WHERE email='".$email."' AND password='".$curPass."' LIMIT 1";
+				$sql = "UPDATE ".$this->table_name." SET password='".$newPass."' WHERE username = '".$username."' AND password='".$curPass."' LIMIT 1";
 
 				if(!$result = mysqli_query($this->con,$sql)){
-				    return True;
+					return False;
 				}
 				else {
-					return False;
+					header('Location: ./login.php');
+				    return True;
 				}
 			}
 
