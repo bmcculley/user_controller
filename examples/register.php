@@ -45,7 +45,7 @@ if (isset($_POST['Submit'])) {
             }
         </style>
     </head>
-	<body>
+	<body onload="setFocus()">
 
 		<!-- show registration form, but only if we didn't submit already -->
 		<form method="post" action="register.php">
@@ -63,5 +63,10 @@ if (isset($_POST['Submit'])) {
 
     	<a href="./login.php">Back to Login Page</a>
 
+    	<script>
+		function setFocus(){
+		    document.getElementById("username").focus();
+		}
+		</script>
 	</body>
 </html>

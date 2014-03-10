@@ -343,14 +343,16 @@ class Login {
 	}
 
 	function verify_email($email, $verify_string) {
+		$email = mysqli_real_escape_string($this->con, $email);
+		$verify_string = mysqli_real_escape_string($this->con, $verify_string);
 		
 		$sql = "UPDATE ".$this->table_name." SET active='y' WHERE email='".$email."' AND verify_string='".$verify_string."' LIMIT 1";
 
-		if(!$result = mysqli_query($this->con,$sql)){
-		    return True;
+		if(!$result = mysqli_query($this->con,$sql)) {
+			return False;
 		}
 		else {
-			return False;
+			return True;
 		}
 
 		mysqli_close($this->con);
