@@ -49,15 +49,11 @@ if (isset($_POST['Submit'])) {
 	<body onload='setFocus()'>
 		
 		<form name="form1" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-			<fieldset>
-				<legend>Login:</legend>
-				<label for="username">Username:</label><br/>
-				<input type="text" id="username" name="username" size="20" value="<?php echo (isset($_POST['login'])) ? $_POST['login'] : $my_access->user; ?>"><br>
-				<label for="password">Password:</label><br/>
-				<input type="password" id="password" name="password" size="20" value="<?php if (isset($_POST['password'])) echo $_POST['password']; ?>"><br>
-				<br/>
-				<input type="submit" class="submit" name="Submit" value="Login">
-			</fieldset>
+			<label for="username">Username:</label><br/>
+			<input type="text" id="username" name="username" size="20" value="<?php echo (isset($_POST['login'])) ? $_POST['login'] : $my_access->user; ?>"><br>
+			<label for="password">Password:</label><br/>
+			<input type="password" id="password" name="password" size="20" value="<?php if (isset($_POST['password'])) echo $_POST['password']; ?>">
+			<input type="submit" class="submit" name="Submit" value="Login">
 		</form>
 		
 		<a href="./register.php">Register new account</a>
