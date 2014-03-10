@@ -10,6 +10,7 @@
 
 class Login {
 
+	private $con;
 	// move salt and default access level to config file
 	private $salt = '40be4e59b9a2a2b5dffb918c0e86b3d7';
 	private $table_name = 'users';
@@ -20,7 +21,7 @@ class Login {
 	private $verify_page;
 
 	function Login() {
-		include_once('../_inc/config.php');
+		include_once('../config.php');
 
 		$this->site_name = $site_name;
 		$this->site_email = $site_email;
@@ -61,7 +62,7 @@ class Login {
 
 	function user_register($email, $username, $password) {
 		// check if the email is valid
-		if( valid_email($email) ) {
+		if( $this->valid_email($email) ) {
 			// email is valid, continue with registeration
 			$email = mysqli_real_escape_string($this->con, $email);
 			$username = mysqli_real_escape_string($this->con, $username);
@@ -74,20 +75,24 @@ class Login {
 			// check that the email or username doesn't already exist in database
 			if( $this->check_user($email, $username) ) {
 				// user already exists
+				return False;
 			}
-			elseif ( $this->password_strength($password) ) {
+			elseif ( !$this->password_strength($password) ) {
 				// password is too short/weak
+				return False;
 			}
 			else {
 				$password = md5($password.$this->salt);
 				$password = mysqli_real_escape_string($this->con, $password);
 				$sql = "INSERT INTO ".$this->table_name." (id, username, password, email, verify_string, access_level, active) 
 							VALUES (NULL, 
-								'".$email."',
 								'".$username."',
 								'".$password."',
+								'".$email."',
 								'".$verify_string."',
-								'".$this->default_access_level."')";
+								'".$this->default_access_level."',
+								'n'
+								)";
 				
 				if(!$result = mysqli_query($this->con,$sql)){
 				    die('There was an error running the query [' . $this->con->error . ']');
@@ -95,7 +100,7 @@ class Login {
 				else {
 					// set a page to redirect user to
 					$this->send_email($email, $verify_string);
-					header('Location: ./');
+					header('Location: ./login.php');
 					return True;
 				}
 
@@ -105,6 +110,7 @@ class Login {
 		}
 		else {
 			// email address is no good, do not register
+			echo 'bad email address';
 			return False;
 		}
 
@@ -113,7 +119,7 @@ class Login {
 	private function password_strength($password) {
 		$returnVal = True;
 
-		if ( strlen($password) < $password_length ) {
+		if ( strlen($password) < $this->password_length ) {
 			$returnVal = False;
 		}
 
@@ -137,9 +143,11 @@ class Login {
 
 	}
 
-	function forgot_password($email = NULL, $username = NULL) {
+	function forgot_password($email) {
 		// check if username or email exists in database send password reset accordingly
-		if( isset($email) && valid_email($email) ) {
+		if( isset($email) && $this->valid_email($email) ) {
+
+			$email = mysqli_real_escape_string($this->con, $email);
 			$sql = "SELECT * FROM ".$this->table_name." WHERE email = '".$email."' AND active = 'y' LIMIT 1";
 
 			if(!$result = mysqli_query($this->con,$sql)){
@@ -147,8 +155,8 @@ class Login {
 			}
 			else {
 				$newPass = $this->new_password();
-				
-				$sql = "UPDATE ".$this->table_name." SET password='".$newPass."' WHERE email='".$email."' LIMIT 1";
+				$encryptNewPass = md5($newPass.$this->salt);
+				$sql = "UPDATE ".$this->table_name." SET password='".$encryptNewPass."' WHERE email='".$email."' LIMIT 1";
 
 				if(!$result = mysqli_query($this->con,$sql)){
 				    return False;
@@ -157,41 +165,12 @@ class Login {
 					while($row = $result->fetch_assoc()) {
 					
 					    $username = $row['username'];
+					    //echo $username;
 					    
 					} 
 					// set a page to redirect user to
 					$this->send_email($email, NULL, $username, $newPass);
-					header('Location: ./');
-					return True;
-				}
-			}
-
-			mysqli_close($this->con);
-		}
-		elseif ( isset($username) ) {
-
-			$sql = "SELECT * FROM ".$this->table_name." WHERE username = '".$username."' AND active = 'y' LIMIT 1";
-
-			if(!$result = mysqli_query($this->con,$sql)){
-			    return False;
-			}
-			else {
-				$newPass = $this->new_password();
-				
-				$sql = "UPDATE ".$this->table_name." SET password='".$newPass."' WHERE username='".$username."' LIMIT 1";
-
-				if(!$result = mysqli_query($this->con,$sql)){
-				    return False;
-				}
-				else {
-					while($row = $result->fetch_assoc()) {
-					
-					    $email = $row['email'];
-					    
-					} 
-					// set a page to redirect user to
-					$this->send_email($email, NULL, $username, $newPass);
-					header('Location: ./');
+					header('Location: ./login.php');
 					return True;
 				}
 			}
@@ -256,16 +235,21 @@ class Login {
 		    die('There was an error running the query [' . $this->con->error . ']');
 		}
 		else {
-			$newPass = md5($newPass.$this->salt);
-			$newPass = mysqli_real_escape_string($this->con, $newPass);
-
-			$sql = "UPDATE ".$this->table_name." SET password='".$newPass."' WHERE email='".$email."' AND password='".$curPass."' LIMIT 1";
-
-			if(!$result = mysqli_query($this->con,$sql)){
-			    return True;
+			if ( !$this->password_strength($newPass) ) {
+				return False;
 			}
 			else {
-				return False;
+				$newPass = md5($newPass.$this->salt);
+				$newPass = mysqli_real_escape_string($this->con, $newPass);
+
+				$sql = "UPDATE ".$this->table_name." SET password='".$newPass."' WHERE email='".$email."' AND password='".$curPass."' LIMIT 1";
+
+				if(!$result = mysqli_query($this->con,$sql)){
+				    return True;
+				}
+				else {
+					return False;
+				}
 			}
 
 		}
