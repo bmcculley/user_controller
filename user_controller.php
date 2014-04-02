@@ -100,6 +100,7 @@ class Login {
 				else {
 					// set a page to redirect user to
 					$this->send_email($email, $verify_string);
+					// need a better way to set the redirect page
 					header('Location: ./login.php');
 					return True;
 				}
@@ -333,7 +334,7 @@ class Login {
 			$body = "Your password has been reset on ".date("Y-m-d").":\r\n\r\nYour username: ".$username."\r\n\r\nYour password: ".$newPass;
 		}
 		
-		if (mail($mail_address, $subject, $body, $header)) {
+		if (mail($email, $subject, $body, $header)) {
 			return true;
 		} 
 		else {
