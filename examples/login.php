@@ -8,7 +8,12 @@ require_once('../user_controller.php');
 $login = new Login();
 
 if (isset($_POST['Submit'])) {
-	$login->user_login($_REQUEST['username'], $_REQUEST['password'], $_REQUEST['next'], $_REQUEST['remember']);
+    if ( isset($_REQUEST['remember'])) {
+        $remember = $_REQUEST['remember'];
+    } else {
+        $remember = False;
+    }
+	$login->user_login($_REQUEST['username'], $_REQUEST['password'], $_REQUEST['next'], $remember);
 }
 ?>
 <!DOCTYPE html>
@@ -34,6 +39,13 @@ if (isset($_POST['Submit'])) {
             margin: 0 auto;
             width: 100%;
         }
+        .msg {
+            border: 1px solid #ccc;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+            width: 80%;
+        }
         label {
             position: relative;
             vertical-align: middle;
@@ -55,9 +67,15 @@ if (isset($_POST['Submit'])) {
 	<body onload='setFocus()'>
 		<div class="login-form">
             <h1>Please Login</h1>
-    		<form name="form1" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+            <?php 
+            if ( $login->error_exists() != '' ) { ?>
+            <div class="msg">
+                <?php echo $login->error_exists(); ?>
+            </div>
+            <?php } ?>
+            <form name="form1" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
     			<label for="username">Username:</label><br/>
-    			<input type="text" id="username" name="username" size="20" value="<?php if (isset($_POST['password'])) echo $_POST['login']; ?>"><br>
+    			<input type="text" id="username" name="username" size="20" value="<?php if (isset($_POST['username'])) echo $_POST['username']; ?>"><br>
     			<label for="password">Password:</label><br/>
     			<input type="password" id="password" name="password" size="20" value="<?php if (isset($_POST['password'])) echo $_POST['password']; ?>">
     			<input type="hidden" id="next" name="next" value="<?php if (isset($_GET['next'])) echo $_GET['next']; ?>">

@@ -19,6 +19,7 @@ class Login {
 	private $site_name;
 	private $site_email;
 	private $verify_page;
+	public $error_msg;
 
 	function Login() {
 		include_once('../config.php');
@@ -47,6 +48,11 @@ class Login {
 		return $cookie_array;
 	}
 
+	function error_exists() {
+		return $this->error_msg;
+	}
+
+	// TODO: allow email logins
 	function user_login($username, $password, $referer_page = NULL, $remember_me = False) {
 		$username = mysqli_real_escape_string($this->con, $username);
 		$password = md5($password.$this->salt);
@@ -55,10 +61,10 @@ class Login {
 		$sql = "SELECT * FROM ".$this->table_name." WHERE username = '".$username."' AND password = '".$password."' AND active = 'y' LIMIT 1";
 
 		if(!$result = mysqli_query($this->con,$sql)){
-			// need to return an error to the front
-		    die('There was an error running the query [' . $this->con->error . ']');
+			die('There was an error running the query [' . $this->con->error . ']');
 		}
 		else {
+			$this->error_msg = 'Username or password incorrect.';
 			while($row = $result->fetch_assoc()) {
 			    $this->set_user($row['username'], $row['access_level'], $row['email'], $remember_me);
 			    if ( isset($referer_page) ) {
