@@ -35,7 +35,19 @@ class Login {
 		$this->con = mysqli_connect($host, $user, $pass, $db);
 	}
 
-	function user_login($username, $password, $referer_page = NULL) {
+	// decrypt the cookie
+	private function cookie_decrypt($cookie_value) {
+		$decryptedValue = base64_decode($cookie_value);
+		$cookie_array = split(",", $decryptedValue);
+		/*
+		$username = $cookie_array[0];
+		$access_lvl = $cookie_array[1];
+		$email = $cookie_array[2];
+		*/
+		return $cookie_array;
+	}
+
+	function user_login($username, $password, $referer_page = NULL, $remember_me = False) {
 		$username = mysqli_real_escape_string($this->con, $username);
 		$password = md5($password.$this->salt);
 		$password = mysqli_real_escape_string($this->con, $password);
@@ -43,11 +55,12 @@ class Login {
 		$sql = "SELECT * FROM ".$this->table_name." WHERE username = '".$username."' AND password = '".$password."' AND active = 'y' LIMIT 1";
 
 		if(!$result = mysqli_query($this->con,$sql)){
+			// need to return an error to the front
 		    die('There was an error running the query [' . $this->con->error . ']');
 		}
 		else {
 			while($row = $result->fetch_assoc()) {
-			    $this->set_user($row['username'], $row['access_level']);
+			    $this->set_user($row['username'], $row['access_level'], $row['email'], $remember_me);
 			    if ( isset($referer_page) ) {
 			    	header('Location: '.$referer_page);
 			    }
@@ -262,15 +275,41 @@ class Login {
 		mysqli_close($this->con);
 	}
 
-	private function set_user($username, $access_level) {
-		setcookie('user', $username);
-		$_SESSION['username'] = $username;
-		$_SESSION['access_level'] = $access_level;
+	// TODO: make cookies more secure
+	private function set_user($username, $access_level, $email_address, $remember_me) {
+		$cookie_str = $username.','.$access_level.','.$email_address;
+		$encrypted_cookie = base64_encode($cookie_str.','.$this->salt);
+		if ( $remember_me ) {
+			// set future expiration (7 days)
+			// TODO: add admin controlled expiration time
+			setcookie('user', $encrypted_cookie,time() + (86400* 7));
+		} else {
+			// cookie expires at the end of session
+			setcookie('user', $encrypted_cookie);
+		}
 	}
 
 	function access_level() {
-		if (isset($_SESSION['access_level'])) {
-			return $_SESSION['access_level'];
+		if ( isset( $_COOKIE['user'] ) ) {
+			return $this->cookie_decrypt( $_COOKIE['user'] )[1];
+		}
+		else {
+			return 0;
+		}
+	}
+
+	function get_name() {
+		if ( isset( $_COOKIE['user'] ) ) {
+			return $this->cookie_decrypt( $_COOKIE['user'] )[0];
+		}
+		else {
+			return 0;
+		}
+	}
+
+	function get_email() {
+		if ( isset( $_COOKIE['user'] ) ) {
+			return $this->cookie_decrypt( $_COOKIE['user'] )[2];
 		}
 		else {
 			return 0;
@@ -292,9 +331,7 @@ class Login {
 	}
 
 	function user_logout() {
-		unset($_COOKIE['user']);
-		unset($_SESSION['username']);
-		unset($_SESSION['access_level']);
+		setcookie('user','');
 		session_destroy();
 		header('Location: ./');
 	}
