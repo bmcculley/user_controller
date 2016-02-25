@@ -278,7 +278,7 @@ class Login {
 	// TODO: make cookies more secure
 	private function set_user($username, $access_level, $email_address, $remember_me) {
 		$cookie_str = $username.','.$access_level.','.$email_address;
-		$encrypted_cookie = base64_encode($cookie_str.','.$this->salt);
+		$encrypted_cookie = base64_encode($cookie_str);
 		if ( $remember_me ) {
 			// set future expiration (7 days)
 			// TODO: add admin controlled expiration time
